@@ -4,11 +4,11 @@
 # TODO: Lagring av brukerdata - Ser på det imorgen
 
 from flask import Flask, render_template, request, redirect, session
-from user import User
+from user import User, get_all
 from pprint import pprint
 
 # Temporary (RAM lagring)
-users = {} # Type {[str, User]}
+users = get_all() # Type {[str, User]}
 
 app = Flask(__name__)
 app.secret_key = "3hfdsajfhskruk"
