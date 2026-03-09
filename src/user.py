@@ -8,61 +8,79 @@ DATABASE = "test.db"
 
 
 
+import sqlite3
+
+DATABASE = "test.db"
+
 @dataclass
 class User:
     username: str
     password: str
 
-    fornavn: str = ""
-    etternavn: str = ""
+    fornavn: str
+    etternavn: str
+
+    _load_from_db: bool = False
 
     def __post_init__(self):
+        if self._load_from_db:
+            return
+        self.username = self.username.lower()
         self.password = hash_password(self.password, self.username)
-        self.save()
+        self.save_to_db()
 
-        def save(self):
-            conn = sqlite3.connect(DATABASE)
-            cursor = conn.cursor()
-            cursor.execute("""INSERT INTO users(
-                           username,
-                           password,
-                           forvanv,
-                           etternavn
-                        ) VALUES (:username,
-                           :password,
-                           :fornavn,
-                           :etternavn)""", self.__dict__)
-            conn.commit()
-            conn.close()
-
-
+    def save_to_db(self):
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+        cursor.execute("""INSERT INTO users (
+            username,
+            password,
+            fornavn,
+            etternavn
+        ) VALUES (:username, 
+                  :password, 
+                  :fornavn, 
+                  :etternavn)""", self.__dict__)
+        conn.commit()
+        conn.close()
 
     def check_password(self, password: str) -> bool:
         return is_correct_password(password, self.username, self.password)
-    
+
     @property
-    def full_navn(self) -> str:
+    def fullt_navn(self):
         return f"{self.fornavn} {self.etternavn}"
 
-def get_all():
+def get_all() -> dict[str, User]:
     data = {}
+
+    # SQL (tullball)
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users")
-    for row in cursor.fetchall():
 
+    for row in cursor.fetchall():
         # 0 = username, 1 = pass, 2 = fornavn, 3 = etternavn
-        data[row[0]] = User(*row)
+        data[row[0]] = User(*row, _load_from_db=True)
+
+    # Ferdig med SQL
     conn.close()
     return data
 
+def get(username: str):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+
+    data = User(*cursor.fetchone(), _load_from_db=True)
+
+    conn.close()
+    return data
 
 def init_db():
-    conn = sqlite3.connect(DATABASE) # Lager en tilkobling til databasen
-    cursor = conn.cursor() # Lager en cursor for å utføre SQL-kommandoer
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
 
-
-    # Creates a tabele, and if it already exists, it does not create a new one. It crashes if you do not have IF NOT EXISTS
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         username TEXT PRIMARY KEY,
@@ -74,6 +92,5 @@ def init_db():
     """)
     conn.commit()
     conn.close()
-
 
 init_db()

@@ -4,19 +4,23 @@
 # TODO: Lagring av brukerdata - Ser på det imorgen
 
 from flask import Flask, render_template, request, redirect, session
-from user import User
+from user import User, get_all
 from pprint import pprint
 
 # Temporary (RAM lagring)
-users = {} # Type {[str, User]}
+users = get_all() # Type {[str, User]}
 
 app = Flask(__name__)
-# sessions require a secret key; in production use a secure random value
-app.secret_key = "dev"
+app.secret_key = "3hfdsajfhskruk"
 
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/log-out")
+def log_out():
+    session.clear()
+    return redirect("/")
 
 @app.route("/register")
 def get_register():
@@ -25,41 +29,29 @@ def get_register():
 
 @app.route("/register", methods=["POST"])
 def post_register():
-    form_data = request.form.to_dict()
-    username = form_data.get("username", "").strip()
-    password = form_data.get("password", "")
+    user = User(**request.form)
 
     # empty fields
     if not username or not password:
         return render_template("register.html", error="Både brukernavn og passord må fylles ut", form=form_data)
 
-    # duplicate username
-    if username.lower() in users:
-        return render_template("register.html", error="Brukernavnet er allerede tatt", form=form_data)
-
-    # create user
-    users[username.lower()] = User(username, password)
+    users[user.username.lower()] = user
+    session["user"] = user
+    session["logged_in"] = True
     pprint(users)
     return redirect("/")
 
-
-@app.route("/login")
+@app.route("/log-in")
 def get_login():
     return render_template("login.html")
 
-@app.route("/login", methods=["POST"])
+@app.route("/log-in", methods=["POST"])
 def post_login():
-    username = request.form.get("username", "").strip()
-    password = request.form.get("password", "")
-
-    # check existence
-    if not username or username.lower() not in users:
-        return render_template("login.html", error="Wrong password or username", form=request.form)
-
-    user = users.get(username.lower())
-    if not user or not user.check_password(password):
-        return render_template("login.html", error="Wrong password or username", form=request.form)
-
+    user = users.get(request.form.get("username").lower(), False)
+    if not user or not user.check_password(request.form.get("password")):
+        return render_template("login.html",
+                               error_msg="Feil brukernavn eller passord.",
+                               form=request.form)
     session["user"] = user
     session["logged_in"] = True
     return redirect("/")
