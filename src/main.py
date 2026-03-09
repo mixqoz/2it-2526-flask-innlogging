@@ -29,14 +29,35 @@ def get_register():
 
 @app.route("/register", methods=["POST"])
 def post_register():
-    user = User(**request.form)
+    # copy form data to a dict so we can reuse it if validation fails
+    form_data = request.form.to_dict()
+    username = form_data.get("username", "").strip()
+    password = form_data.get("password", "").strip()
+    fornavn = form_data.get("fornavn", "").strip()
+    etternavn = form_data.get("etternavn", "").strip()
 
     # empty fields
     if not username or not password:
-        return render_template("register.html", error="Både brukernavn og passord må fylles ut", form=form_data)
+        return render_template(
+            "register.html",
+            error="Både brukernavn og passord må fylles ut",
+            form=form_data,
+        )
 
+    # already exists?
+    if username.lower() in users:
+        return render_template(
+            "register.html",
+            error="Brukernavnet er allerede tatt",
+            form=form_data,
+        )
+
+    # create and persist the user
+    user = User(username=username, password=password, fornavn=fornavn, etternavn=etternavn)
     users[user.username.lower()] = user
-    session["user"] = user
+
+    # only store the username in session (objects are not JSON serializable)
+    session["user"] = user.username
     session["logged_in"] = True
     pprint(users)
     return redirect("/")
@@ -47,14 +68,21 @@ def get_login():
 
 @app.route("/log-in", methods=["POST"])
 def post_login():
-    user = users.get(request.form.get("username").lower(), False)
-    if not user or not user.check_password(request.form.get("password")):
-        return render_template("login.html",
-                               error_msg="Feil brukernavn eller passord.",
-                               form=request.form)
-    session["user"] = user
+    user = users.get(request.form.get("username", "").lower(), None)
+    if not user or not user.check_password(request.form.get("password", "")):
+        return render_template(
+            "login.html",
+            error_msg="Feil brukernavn eller passord.",
+            form=request.form,
+        )
+    session["user"] = user.username
     session["logged_in"] = True
     return redirect("/")
+
+# make the users dictionary available in every template
+@app.context_processor
+def inject_users():
+    return dict(users=users)
 
 # Dev mode:
 if __name__ == "__main__":

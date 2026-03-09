@@ -14,7 +14,7 @@
         <nav>
             {% block nav %}
                 <a href="/">Hjem</a>
-                {% if not session.logged_in %}
+                {% if not session.get('logged_in') %}
                 <a href="/register">Registrer</a>
                 <a href="/log-in">Logg inn</a>
                 {% else %}
@@ -23,7 +23,7 @@
             {% endblock %}
         </nav>
         {% if session.user %}
-        <p>Hei {{ session.user.fullt_navn }}!</p>
+        <p>Hei {{ users[session.user].fullt_navn }}!</p>
         {% endif %}
     </header>
     <main>
