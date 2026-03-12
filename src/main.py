@@ -3,7 +3,9 @@
 
 # TODO: Lagring av brukerdata - Ser på det imorgen
 
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, send_file
+from decorators import login_required
+from werkzeug.exceptions import HTTPException
 from user import User, get_all
 from pprint import pprint
 
@@ -62,6 +64,11 @@ def post_register():
     pprint(users)
     return redirect("/")
 
+@app.route("/min-profil")
+@login_required
+def min_profil():
+    return render_template("min_profil.html")
+
 @app.route("/log-in")
 def get_login():
     return render_template("login.html")
@@ -83,6 +90,17 @@ def post_login():
 @app.context_processor
 def inject_users():
     return dict(users=users)
+
+
+@app.route("/comment/<post_id>", methods=["GET"])
+def comment(post_id):
+    form_data = request.form
+    comment = form_data.get("comment")
+    if not session.get("logged_in"):
+        return "du må logge inn :("
+    return "OK"
+
+
 
 # Dev mode:
 if __name__ == "__main__":

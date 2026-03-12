@@ -15,6 +15,8 @@
             {% block nav %}
                 <a href="/">Hjem</a>
                 {% if not session.get('logged_in') %}
+                <a href="/min-profil">Profil</a>
+                {% if not session.logged_in %}
                 <a href="/register">Registrer</a>
                 <a href="/log-in">Logg inn</a>
                 {% else %}

@@ -13,6 +13,10 @@
         <input type="submit">
     </form>
 
+    {% if redirect_to %}
+    <p>Sender deg til {{ redirect_to }}</p>
+    {% endif %}
+
     {% if error_msg %}
     <p style="color:red;">{{ error_msg }}</p>
     {% endif %}
