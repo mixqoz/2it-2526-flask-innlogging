@@ -1,8 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <div class="form-box">
+        {% if error_msg %}
+        <p class="message">{{ error_msg }}</p>
+        {% else %}
+        <p class="message">&nbsp;</p>
+        {% endif %}
 
-    <form action="{{ url_for('post_login') }}" method="post">
+        <form action="{{ url_for('post_login') }}" method="post">
         <br>
         <label for="username">Brukernavn</label>
         <input id="username" name="username" required value="{{ form.username if form }}">
@@ -17,8 +23,6 @@
     <p>Sender deg til {{ redirect_to }}</p>
     {% endif %}
 
-    {% if error_msg %}
-    <p style="color:red;">{{ error_msg }}</p>
-    {% endif %}
+    </div>
 
 {% endblock %}

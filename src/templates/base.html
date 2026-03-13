@@ -5,36 +5,43 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{ url_for('static', filename='baseStyle.css') }}">
     <title>{{ title or "Fancy App" }}</title>
     {% include "styles.html" %}
 </head>
 <body class="bg-gray-800 text-white">
-    <header>
-        {% block header %}Logo.{% endblock %}
-        <nav>
-            {% block nav %}
-                <a href="/">Hjem</a>
-                {% if not session.get('logged_in') %}
-                <a href="/min-profil">Profil</a>
-                {% if not session.logged_in %}
-                <a href="/register">Registrer</a>
-                <a href="/log-in">Logg inn</a>
-                {% else %}
-                <a href="/log-out">Logg ut</a>
-                {% endif %}
+    <div class="app-container">
+        <header>
+            {% block header %}
+                <div class="logo">
+        	        <img src="{{ url_for('static', filename='logoCat.png') }}">
+    	        </div>
+            
             {% endblock %}
-        </nav>
-        {% if session.user %}
-        <p>Hei {{ users[session.user].fullt_navn }}!</p>
-        {% endif %}
-    </header>
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-    <footer>
+            <nav>
+                {% block nav %}
+                    <a href="/">Hjem</a>
+                    {% if session.get('logged_in') %}
+                        <a href="/min-profil">Profil</a>
+                        <a href="/log-out">Logg ut</a>
+                    {% else %}
+                        <a href="/register">Registrer</a>
+                        <a href="/log-in">Logg inn</a>
+                    {% endif %}
+                {% endblock %}
+            </nav>
+            {% if session.user %}
+            <p class="greeting">Hei {{ users[session.user].fullt_navn }}!</p>
+            {% endif %}
+        </header>
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+        <footer>
         {% block footer %}
             {% include "footer.html" %}
         {% endblock %}
-    </footer>
+        </footer>
+    </div>
 </body>
 </html>

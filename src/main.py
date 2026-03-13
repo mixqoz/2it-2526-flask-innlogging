@@ -1,15 +1,5 @@
-<<<<<<< Updated upstream
-# Algoritme som bruker salt & pepper X
-# Krypteringsfunksjon X
-
-# TODO: Lagring av brukerdata - Ser på det imorgen
-
-from flask import Flask, render_template, request, redirect, session, send_file
-from decorators import login_required
-from werkzeug.exceptions import HTTPException
-=======
 from flask import Flask, render_template, request, redirect, session
->>>>>>> Stashed changes
+from decorators import login_required
 from user import User, get_all
 from pprint import pprint
 
@@ -43,10 +33,24 @@ def post_register():
     etternavn = form_data.get("etternavn", "").strip()
 
     # empty fields
-    if not username or not password:
+    if not username and not password:
         return render_template(
             "register.html",
-            error="Både brukernavn og passord må fylles ut",
+            error="Brukernavn og passord må fylles ut",
+            form=form_data,
+        )
+
+    if not username:
+        return render_template(
+            "register.html",
+            error="Brukernavn må fylles ut",
+            form=form_data,
+        )
+
+    if not password:
+        return render_template(
+            "register.html",
+            error="Passord må fylles ut",
             form=form_data,
         )
 
@@ -71,7 +75,9 @@ def post_register():
 @app.route("/min-profil")
 @login_required
 def min_profil():
-    return render_template("min_profil.html")
+    username = session.get("user")
+    current_user = users.get(username.lower()) if username else None
+    return render_template("min_profil.html", user=current_user)
 
 @app.route("/log-in")
 def get_login():
@@ -79,13 +85,45 @@ def get_login():
 
 @app.route("/log-in", methods=["POST"])
 def post_login():
-    user = users.get(request.form.get("username", "").lower(), None)
-    if not user or not user.check_password(request.form.get("password", "")):
+    username = request.form.get("username", "").strip()
+    password = request.form.get("password", "").strip()
+
+    if not username and not password:
         return render_template(
             "login.html",
-            error_msg="Feil brukernavn eller passord.",
+            error_msg="Både brukernavn og passord må fylles ut.",
             form=request.form,
         )
+
+    if not username:
+        return render_template(
+            "login.html",
+            error_msg="Brukernavn må fylles ut.",
+            form=request.form,
+        )
+
+    if not password:
+        return render_template(
+            "login.html",
+            error_msg="Passord må fylles ut.",
+            form=request.form,
+        )
+
+    user = users.get(username.lower(), None)
+    if not user:
+        return render_template(
+            "login.html",
+            error_msg="Brukeren finnes ikke.",
+            form=request.form,
+        )
+
+    if not user.check_password(password):
+        return render_template(
+            "login.html",
+            error_msg="Feil passord.",
+            form=request.form,
+        )
+
     session["user"] = user.username
     session["logged_in"] = True
     return redirect("/")
@@ -96,12 +134,16 @@ def inject_users():
     return dict(users=users)
 
 
-@app.route("/comment/<post_id>", methods=["GET"])
+@app.route("/comment/<post_id>", methods=["POST"])
 def comment(post_id):
-    form_data = request.form
-    comment = form_data.get("comment")
     if not session.get("logged_in"):
         return "du må logge inn :("
+
+    form_data = request.form
+    comment_text = form_data.get("comment", "").strip()
+    if not comment_text:
+        return "Kommentar kan ikke være tom."
+
     return "OK"
 
 

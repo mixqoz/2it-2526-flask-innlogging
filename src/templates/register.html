@@ -2,14 +2,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <p id="error-message" style="color:red;">{{ error if error else '' }}</p>
+    <div class="form-box">
+        <p id="error-message" class="message">{{ error if error else '' }}</p>
 
-    <form id="register-form" action="{{ url_for('post_register') }}" method="post" novalidate>
-        <br>
-        <label for="username">Brukernavn</label>
+        <form id="register-form" action="{{ url_for('post_register') }}" method="post" novalidate>
+        <label for="username">Brukernavn *</label>
         <input id="username" name="username" value="{{ form.username if form else '' }}">
         <br>
-        <label for="password">Passord</label>
+        <label for="password">Passord *</label>
         <input id="password" type="password" name="password">
         <br>
         <label for="fornavn">Fornavn</label>
@@ -17,9 +17,9 @@
         <br>
         <label for="etternavn">Etternavn</label>
         <input id="etternavn" name="etternavn" required>
-        <br>
         <input type="submit">
     </form>
+    </div>
     {#
         {"username":"brukernavnet",
          "password":"passordet"} -> /register POST (request.form)
