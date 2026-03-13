@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # Algoritme som bruker salt & pepper X
 # Krypteringsfunksjon X
 
@@ -6,6 +7,9 @@
 from flask import Flask, render_template, request, redirect, session, send_file
 from decorators import login_required
 from werkzeug.exceptions import HTTPException
+=======
+from flask import Flask, render_template, request, redirect, session
+>>>>>>> Stashed changes
 from user import User, get_all
 from pprint import pprint
 
