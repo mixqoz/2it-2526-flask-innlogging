@@ -1,1 +1,1 @@
-{"config":{"indexing":"full","lang":["en"],"min_search_length":3,"prebuild_index":false,"separator":"[\\s\\-]+"},"docs":[{"location":"about/","text":"About A simple registry system","title":"About"},{"location":"about/#about","text":"A simple registry system","title":"About"}]}
+{"config":{"indexing":"full","lang":["en"],"min_search_length":3,"prebuild_index":false,"separator":"[\\s\\-]+"},"docs":[{"location":"","text":"About A simple registry system","title":"Home"},{"location":"#about","text":"A simple registry system","title":"About"}]}
